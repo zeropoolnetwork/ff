@@ -19,10 +19,12 @@ byteorder = { version = "1", default-features = false, optional = true }
 ff_derive = { version = "0.13", path = "ff_derive", optional = true }
 rand_core = { version = "0.6", default-features = false }
 subtle = { version = "2.2.1", default-features = false, features = ["i128"] }
+borsh = { version = "0.9", optional = true }
 
 [dev-dependencies]
 blake2b_simd = "1"
 rand = "0.8"
+borsh = "0.9"
 
 [features]
 default = ["bits", "std"]
@@ -33,6 +35,7 @@ std = ["alloc"]
 # with MSRV 1.60 this could be merged into bits with ff_derive?/bits
 # see PR#72 for more information.
 derive_bits = ["bits", "ff_derive/bits"]
+borsh = ["dep:borsh", "ff_derive/borsh"]
 
 [[test]]
 name = "derive"

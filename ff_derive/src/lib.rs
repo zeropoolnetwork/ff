@@ -178,8 +178,35 @@ pub fn prime_field(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         sqrt_impl,
     ));
 
+    #[cfg(feature = "borsh")]
+    {
+        gen.extend(prime_field_borsh_impl(&ast.ident));
+    }
+
     // Return the generated impl
     gen.into()
+}
+
+#[cfg(feature = "borsh")]
+fn prime_field_borsh_impl(
+    name: &syn::Ident,
+) -> proc_macro2::TokenStream {
+    quote! {
+        impl ::borsh::ser::BorshSerialize for #name {
+            fn serialize<W: ::borsh::maybestd::io::Write>(&self, writer: &mut W) -> ::borsh::maybestd::io::Result<()> {
+                let uint = self.to_uint();
+                uint.serialize(writer)
+            }
+        }
+
+        impl ::borsh::de::BorshDeserialize for #name {
+            fn deserialize(buf: &mut &[u8]) -> ::borsh::maybestd::io::Result<Self> {
+                let uint = <<#name as PrimeFieldParams>::Inner as ::borsh::de::BorshDeserialize>::deserialize(buf)?;
+                Self::from_uint(uint)
+                    .ok_or(::borsh::maybestd::io::Error::from(::borsh::maybestd::io::ErrorKind::InvalidData))
+            }
+        }
+    }
 }
 
 /// Checks that `body` contains `pub [u64; limbs]`.

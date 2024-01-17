@@ -15,6 +15,7 @@ edition = "2021"
 [features]
 # enabled when generating bitvec code utilizing the version of ff's bitvec
 bits = []
+borsh = []
 
 [lib]
 proc-macro = true

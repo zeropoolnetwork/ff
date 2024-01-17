@@ -32,6 +32,20 @@ use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use rand_core::RngCore;
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq, CtOption};
 
+
+#[cfg(not(feature = "borsh"))]
+pub mod ser {
+    pub trait Serialization {}
+    impl<T> Serialization for T {}
+}
+
+#[cfg(feature = "borsh")]
+pub mod ser {
+    pub use borsh::{BorshDeserialize, BorshSerialize};
+    pub trait Serialization: BorshSerialize + BorshDeserialize {}
+    impl<T: BorshSerialize + BorshDeserialize> Serialization for T {}
+}
+
 /// Bit representation of a field element.
 #[cfg(feature = "bits")]
 #[cfg_attr(docsrs, doc(cfg(feature = "bits")))]
@@ -67,6 +81,7 @@ pub trait Field:
     + for<'a> AddAssign<&'a Self>
     + for<'a> SubAssign<&'a Self>
     + for<'a> MulAssign<&'a Self>
+    + ser::Serialization
 {
     /// The zero element of the field, the additive identity.
     const ZERO: Self;
